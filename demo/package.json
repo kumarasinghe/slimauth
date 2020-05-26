@@ -1,0 +1,28 @@
+{
+  "name": "demo",
+  "version": "1.0.0",
+  "description": "A  demo for SlimAuth - The simplest authentication middleware for Express",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.17.1",
+    "slimauth": "^1.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node index.js"
+  },
+  "keywords": [
+    "authentication",
+    "user",
+    "accounts",
+    "login",
+    "lightweight",
+    "cookie",
+    "token",
+    "sessions",
+    "signup",
+    "express"
+  ],
+  "author": "Naveen Kumarasinghe <dndkumarasinghe@gmail.com>",
+  "license": "MIT"
+}

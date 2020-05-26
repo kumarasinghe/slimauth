@@ -1,0 +1,31 @@
+{
+  "name": "slimauth",
+  "version": "1.0.0",
+  "description": "The simplest authentication middleware for Express",
+  "main": "slimauth.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kumarasinghe/slimauth.git"
+  },
+  "keywords": [
+    "authentication",
+    "user",
+    "accounts",
+    "login",
+    "lightweight",
+    "cookie",
+    "token",
+    "sessions",
+    "signup",
+    "express"
+  ],
+  "author": "Naveen Kumarasinghe <dndkumarasinghe@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kumarasinghe/slimauth/issues"
+  },
+  "homepage": "https://github.com/kumarasinghe/slimauth#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
