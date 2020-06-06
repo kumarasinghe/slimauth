@@ -1,44 +1,63 @@
 /*
+slimauth usage example
 Author: naveenk <dndkumarasinghe@gmail.com>
-This code is simplified for easy comprehension 
-and is not upto production standards.
 */
 
+// SETUP EXPRESS
 const express = require('express')
-const slimAuth = require('./slimauth')
-
 const app = express()
-app.use(express.static('public'))       // let guests access files in public_html
-app.use(express.urlencoded())           // needed for POST form data extraction
-app.use(slimAuth.requestAuthenticator)  // enables authentication handling
+app.use(express.static('public'))                   // let guests access public directory
+app.use(express.urlencoded({ extended: true }))     // needed for POST form data extraction
+
+// SETUP SLIMAUTH
+const SlimAuth = require('slimauth')
+let slimauth = new SlimAuth(
+    '/login.html',                                  // URL to redirect unauthorized requests
+    [                                               // An array of routes that require authorization
+        '/memberarea',
+        '/close',
+        '/changepassword'
+    ]
+)
+app.use(slimauth.requestAuthenticator)              // enables authentication handling
 
 
-// handler: landing page
-app.get('/', (req, res) => {
+/********************************** GET ************************************/
 
-    // user is logged in
-    if (req.userID) {
-        res.sendFile(__dirname + '/private/members_area.html')
-    }
-    // user not logged in
-    else {
-        res.sendFile(__dirname + '/public/members_area.html')
-    }
+app.get('/memberarea', (req, res) => {
+    res.sendFile(__dirname + '/private/memberarea.html')
+})
 
+app.get('/close', (req, res) => {
+    res.sendFile(__dirname + '/private/close.html')
+})
+
+app.get('/changepassword', (req, res) => {
+    res.sendFile(__dirname + '/private/changepassword.html')
+})
+
+app.get('/logout', (req, res) => {
+    slimauth.deauthenticate(req.userID)
+    res.redirect('/')
+    console.log('User logged out:', req.userID)
 })
 
 
-// API : signup
-app.post('/api/signup', (req, res) => {
+/*********************************** POST *************************************/
+
+app.post('/signup', (req, res) => {
 
     let email = req.body['email']
     let password = req.body['password']
 
     // create user account
-    slimAuth.createUser(email, password)
+    slimauth.createUser(email, password)
         .then(
             // success
-            () => { res.redirect('/login.html') },
+            () => {
+                res.redirect('/login.html')
+                console.log('User account created for', email)
+            },
             // fail
             (err) => { res.end(err.message) }
         )
@@ -46,61 +65,63 @@ app.post('/api/signup', (req, res) => {
 })
 
 
-// API: login
-app.post('/api/login', (req, res) => {
+app.post('/login', (req, res) => {
 
     let email = req.body['email']
     let password = req.body['password']
 
-    // validate credentials
-    slimAuth.authenticate(email, password, res)
+    // valiate password and log the user in for next 30 days
+    slimauth.authenticate(email, password, res)
         .then(
             // success
-            () => { res.redirect('/') },
+            () => {
+                res.redirect('/memberarea')
+                console.log('User logged in:', email)
+            },
             // fail
             (err) => { res.send(err.message) }
         )
 })
 
 
-// API: logout
-app.get('/api/logout', (req, res) => {
-
-    slimAuth.deauthenticate(req.userID)
-    res.redirect('/')
-
-})
-
-
-// API: change password
-app.post('/api/change-password', (req, res) => {
+app.post('/changepassword', (req, res) => {
 
     let currentPassword = req.body.oldPassword
     let newPassword = req.body.newPassword
 
-    slimAuth.updatePassword(req.userID, currentPassword, newPassword)
+    // valiate the current password and change it
+    slimauth.updatePassword(req.userID, currentPassword, newPassword)
         .then(
             // success
-            () => { res.redirect('/api/logout') },
+            () => {
+                res.redirect('/logout')
+                console.log('Password changed for', req.userID)
+            },
             // fail
             (err) => { res.end(err.message) }
         )
 })
 
 
-// API: close account
-app.get('/api/close', (req, res) => {
+app.post('/close', (req, res) => {
 
-    let password = req.query.password
+    let password = req.body.password
 
-    slimAuth.deleteUser(req.userID, password)
+    // valiate the current password and remove user account
+    slimauth.deleteUser(req.userID, password)
         .then(
             // success
-            () => { res.redirect('/') },
+            () => {
+                res.redirect('/')
+                console.log('Account', req.userID, 'was closed')
+            },
             // fail
             (err) => { res.end(err.message) }
         )
 })
+
+
+/******************************************************************************/
 
 
 // start server on port 80

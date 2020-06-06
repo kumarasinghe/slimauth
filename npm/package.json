@@ -1,6 +1,6 @@
 {
   "name": "slimauth",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "The simplest authentication middleware for Express",
   "main": "slimauth.js",
   "repository": {
@@ -24,8 +24,5 @@
   "bugs": {
     "url": "https://github.com/kumarasinghe/slimauth/issues"
   },
-  "homepage": "https://github.com/kumarasinghe/slimauth#readme",
-  "dependencies": {
-    "express": "^4.17.1"
-  }
+  "homepage": "https://github.com/kumarasinghe/slimauth#readme"
 }

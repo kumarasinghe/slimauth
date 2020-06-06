@@ -8,14 +8,24 @@ const AUTH_TOKEN_AGE = 30 * 24 * 60 * 60 * 1000 // 30 days
 const DATA_DIR = require('path').dirname(require.main.filename) + '/slimauth'
 const ACCOUNT_STORE_FILE = DATA_DIR + '/accounts.json'
 const TOKEN_STORE_FILE = DATA_DIR + '/tokens.json'
-let accountStore
-let tokenStore
+let accountStore, tokenStore, loginURL
+let privateURLObject = {}
 
 /********************************* API CLASS **********************************/
 
 class SlimAuth {
 
-    constructor() {
+    constructor(loginPageURL, privateURLArray, authValidDuration) {
+
+        if (loginPageURL) { loginURL = loginPageURL }
+        if (authValidDuration) { AUTH_TOKEN_AGE = authValidDuration * 24 * 60 * 60 * 1000 }
+
+        if (privateURLArray) {
+            privateURLArray.forEach((publicUrl) => {
+                privateURLObject[publicUrl] = true
+            })
+        }
+
         this.requestAuthenticator = middleware
     }
 
@@ -26,7 +36,7 @@ class SlimAuth {
 
             // if account exists
             if (accountStore[userID]) {
-                reject('User account already exists')
+                reject(new Error('User account already exists'))
                 return
             }
             // account does not exist
@@ -52,11 +62,11 @@ class SlimAuth {
 
             // if account does not exists
             if (!accountStore[userID]) {
-                reject('User account des not exists')
+                reject(new Error('User account des not exists'))
             }
             // incorrect password
             else if (accountStore[userID] != getTextHash(password)) {
-                reject('Incorrect password')
+                reject(new Error('Incorrect password'))
             }
             // account exists
             else {
@@ -84,15 +94,14 @@ class SlimAuth {
 
             // if account does not exists
             if (!accountStore[userID]) {
-                reject('User account des not exists')
+                reject(new Error('User account does not exists'))
             }
             // incorrect password
             else if (accountStore[userID] != getTextHash(currentPassword)) {
-                reject('Incorrect password')
+                reject(new Error('Incorrect password'))
             }
             // account exists
             else {
-
                 // update password in store
                 accountStore[userID] = getTextHash(newPassword)
 
@@ -176,24 +185,29 @@ function middleware(req, res, next) {
     let cookies = decodeURIComponent(req.headers.cookie)
     let cookieStart = cookies.indexOf('slimauth=')
 
-    // access token not found
-    if (cookieStart < 0) {
-        next()
+    // cookie exists
+    if (cookieStart > -1) {
+
+        // extract access token
+        let token = cookies.substr(cookieStart + 9, AUTH_TOKEN_LENGTH)
+
+        // inject userID to request
+        req.userID = res.userID = tokenStore[token]
+
+    }
+
+    // reject requests for private pages from guests
+    if (req.userID == undefined && privateURLObject[req.baseUrl + req.path]) {
+        // redirect to login page if available
+        if (loginURL) {
+            res.redirect(loginURL + '?headingto=' + encodeURIComponent(req.baseUrl + req.path))
+        }
+        else {
+            res.sendStatus(401)
+        }
         return
     }
 
-    // extract access token
-    let token = cookies.substr(cookieStart + 9, AUTH_TOKEN_LENGTH)
-
-    // get user by token
-    let userID
-    if ((userID = tokenStore[token]) == undefined) {
-        next()
-        return
-    }
-
-    // mark request as authorized
-    req.userID = res.userID = userID
     next()
 
 }
@@ -255,4 +269,4 @@ fs.existsSync(TOKEN_STORE_FILE) || writeJSON(TOKEN_STORE_FILE, {})
 // load token data
 tokenStore = readJSON(TOKEN_STORE_FILE)
 
-module.exports = new SlimAuth()
+module.exports = SlimAuth
