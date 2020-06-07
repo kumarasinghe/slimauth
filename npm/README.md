@@ -13,7 +13,6 @@
 ### **✔ Works with Express.**
 ### **✔ Fast, lightweight & configuration-free.**
 
-
 # QUICK START
 Add `express` and `slimauth` to your node project:
 
@@ -24,24 +23,25 @@ Then setup `slimauth`:
     // SETUP EXPRESS
     const express = require('express')
     const app = express()
-    app.use(express.urlencoded())   // for POST request processing
+    app.use(express.urlencoded())      // for POST request processing
 
     // SETUP SLIMAUTH
-    const SlimAuth = require('slimauth')
+    const slimauth = require('slimauth')
 
-    const slimauth =  new SlimAuth(
-        '/login',           // URL to redirect unauthorized requests
-        ['/privatepage']    // routes that require authorization
+    slimauth.setOptions(
+        {
+            // URL to redirect unauthorized requests
+            'loginPageURL': '/login.html',
+            // an array of routes that require authorization 
+            'privateURLArray': ['/private-page'],
+            // login session duration in days
+            'authValidDuration': 30
+        }
     )
 
     app.use(slimauth.requestAuthenticator)
 
 ```
-
-`SlimAuth()` constructor can take three **optional** arguments.
-1. **A login URL**. When those who haven't logged in request private pages, they will be redirected to this URL.
-2. **An array of private routes**. These routes will only be accessible by logged in users. Only the given exact paths are matched.
-3. **Authentication Validity**. Number of days the user is kept logged in. Default is 30.
 
 Handle account creation as follows:
 ```js
@@ -90,7 +90,8 @@ Upon a successfull login, a token cookie will be issued to the browser that will
  `req.userID` is guaranteed to be available inside private route handlers:
 ```js
     app.get('/privatepage', (req, res) => {
-        console.log('User', req.userID, 'requested /privatepage')
+        // gets invoked only by authenticated users
+        console.log('User', req.userID, 'requested the privatepage!')
     })
 ```
 It will also be available for public route handlers if the user is logged in.
@@ -103,7 +104,11 @@ It will also be available for public route handlers if the user is logged in.
 | ---- | --- | --- |
 | slimauth.createUser (userID, password) | Creates a new user | A promise with success & failure handlers |
 | slimauth.authenticate (userID, password, res) | Validates user login. Upon success, the client is given a token valid for next 30 days.| A promise with success & failure handlers |
-| req.userID | Becomes available only when user has logged in. | N/A |
+| slimauth.setOptions(options)| Sets options for SlimAuth. Options are explained below.| N/A
+|options.loginPageURL| When those who haven't logged in request private pages, they will be redirected to this URL.| N/A
+|options.privateURLArray| An array of routes that should only be accessible by logged in users. Only the given exact paths are matched. | N/A
+|authValidDuration|Number of days the user is kept logged in. Default is 30.| N/A
+| req.userID | User ID of the client. Will be available inside private routes. | N/A |
 | slimauth.deauthenticate (userID) | Logs out the current user. Clear the token. | A promise with success & failure handlers |
 | slimauth.updatePassword (userID, currentPassword, newPassword) | Updates the current password and logs user out. |  A promise with success & failure handlers |
 | slimauth.deleteUser (userID, password) | Removes the account, access token and logs user out. | A promise with success & failure handlers |
@@ -124,4 +129,4 @@ It will also be available for public route handlers if the user is logged in.
 
 3. How many browser sessions does it remember?
 
-   `slimauth` will only remember the last logged in browser session. The current session will be forgotten if the user logs in from a different browser.
+   `slimauth` will only remember the last logged in browser session. The current session will be forgotten if the user logs in from a different browser. This is a security enhancement.

@@ -1,3 +1,27 @@
+/*
+MIT License
+
+Copyright (c) 2020 Naveen Kumarasinghe
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 const fs = require('fs')
 const crypto = require('crypto')
 
@@ -15,18 +39,23 @@ let privateURLObject = {}
 
 class SlimAuth {
 
-    constructor(loginPageURL, privateURLArray, authValidDuration) {
+    constructor() {
+        this.requestAuthenticator = middleware
+    }
 
-        if (loginPageURL) { loginURL = loginPageURL }
-        if (authValidDuration) { AUTH_TOKEN_AGE = authValidDuration * 24 * 60 * 60 * 1000 }
 
-        if (privateURLArray) {
-            privateURLArray.forEach((publicUrl) => {
+    setOptions(options){
+
+        if (options.loginPageURL) { loginURL = options.loginPageURL }
+        if (options.authValidDuration) { AUTH_TOKEN_AGE = options.authValidDuration * 24 * 60 * 60 * 1000 }
+
+        if (options.privateURLArray) {
+            // convert the array to an object for faster access
+            options.privateURLArray.forEach((publicUrl) => {
                 privateURLObject[publicUrl] = true
             })
         }
 
-        this.requestAuthenticator = middleware
     }
 
 
@@ -200,7 +229,7 @@ function middleware(req, res, next) {
     if (req.userID == undefined && privateURLObject[req.baseUrl + req.path]) {
         // redirect to login page if available
         if (loginURL) {
-            res.redirect(loginURL + '?headingto=' + encodeURIComponent(req.baseUrl + req.path))
+            res.redirect(loginURL + '?redirect=' + encodeURIComponent(req.protocol + '://' + req.get('host') + req.originalUrl))
         }
         else {
             res.sendStatus(401)
@@ -269,4 +298,4 @@ fs.existsSync(TOKEN_STORE_FILE) || writeJSON(TOKEN_STORE_FILE, {})
 // load token data
 tokenStore = readJSON(TOKEN_STORE_FILE)
 
-module.exports = SlimAuth
+module.exports = new SlimAuth()

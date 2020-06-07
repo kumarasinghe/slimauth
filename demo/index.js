@@ -10,15 +10,16 @@ app.use(express.static('public'))                   // let guests access public 
 app.use(express.urlencoded({ extended: true }))     // needed for POST form data extraction
 
 // SETUP SLIMAUTH
-const SlimAuth = require('slimauth')
-let slimauth = new SlimAuth(
-    '/login.html',                                  // URL to redirect unauthorized requests
-    [                                               // An array of routes that require authorization
-        '/memberarea',
-        '/close',
-        '/changepassword'
-    ]
-)
+const slimauth = require('slimauth')
+slimauth.setOptions(
+    {
+        'loginPageURL': '/login.html',              // URL to redirect unauthorized requests
+        'privateURLArray': [                        // An array of routes that require authorization
+            '/memberarea',
+            '/close',
+            '/changepassword'
+        ]
+    })
 app.use(slimauth.requestAuthenticator)              // enables authentication handling
 
 
