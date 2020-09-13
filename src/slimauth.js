@@ -24,6 +24,7 @@ SOFTWARE.
 
 const fs = require('fs')
 const crypto = require('crypto')
+const bcrypt = require('bcryptjs')
 
 /********************************** CONSTANTS ***********************************/
 
@@ -275,10 +276,11 @@ function writeJSON(filename, object) {
 
 
 /*
-returns md5 hash checksum of given data
+returns bcrypt hash checksum of given data
 */
 function getTextHash(data) {
-    return crypto.createHash('sha1').update(data.toString()).digest("hex")
+    let salt = bcrypt.genSaltSync(10)
+    return bcrypt.hashSync(data.toString(), salt)
 }
 
 /************************************ MAIN *************************************/
