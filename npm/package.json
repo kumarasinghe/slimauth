@@ -7,6 +7,9 @@
     "type": "git",
     "url": "git+https://github.com/kumarasinghe/slimauth.git"
   },
+  "dependencies": {
+    "bcryptjs": "~2.4.3"
+  },
   "keywords": [
     "authentication",
     "user",
