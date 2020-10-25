@@ -230,7 +230,7 @@ function middleware(req, res, next) {
     if (req.userID == undefined && privateURLObject[req.baseUrl + req.path]) {
         // redirect to login page if available
         if (loginURL) {
-            res.redirect(loginURL + '?redirect=' + encodeURIComponent(req.protocol + '://' + req.get('host') + req.originalUrl))
+            res.redirect(loginURL + '?redirect=' + encodeURIComponent(req.protocol + '://' + req.hostname + req.originalUrl))
         }
         else {
             res.sendStatus(401)
