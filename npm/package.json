@@ -1,17 +1,15 @@
 {
   "name": "slimauth",
-  "version": "1.1.1",
+  "version": "0.0.0",
   "description": "The simplest authentication middleware for Express",
   "main": "slimauth.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kumarasinghe/slimauth.git"
-  },
-  "dependencies": {
-    "bcryptjs": "~2.4.3"
+    "url": "git+https://github.com/tzwel/slimauth"
   },
   "keywords": [
     "authentication",
+    "auth",
     "user",
     "accounts",
     "login",
@@ -20,12 +18,13 @@
     "token",
     "sessions",
     "signup",
-    "express"
+    "express",
+    "slimauth"
   ],
-  "author": "Naveen Kumarasinghe <dndkumarasinghe@gmail.com>",
+  "author": "Naveen Kumarasinghe <dndkumarasinghe@gmail.com>, Tzwel <tzwel@int.pl>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/kumarasinghe/slimauth/issues"
+    "url": "https://github.com/tzwel/slimauth/issues"
   },
-  "homepage": "https://github.com/kumarasinghe/slimauth#readme"
+  "homepage": "https://github.com/tzwel/slimauth/issues#readme"
 }
